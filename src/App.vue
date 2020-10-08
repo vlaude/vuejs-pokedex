@@ -1,28 +1,62 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <TheHeader></TheHeader>
+    <div class="pokedex-grid">
+      <PokemonCard
+        v-for="pokemon in pokemons"
+        v-bind:key="pokemon.id"
+        v-bind:pokemon="pokemon"
+      ></PokemonCard>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import PokemonService from "./services/PokemonService";
+
+import TheHeader from "./components/TheHeader";
+import PokemonCard from "./components/PokemonCard";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    TheHeader,
+    PokemonCard,
+  },
+  data: () => {
+    return {
+      pokemons: [],
+    };
+  },
+  mounted() {
+    PokemonService.getPokemons()
+      .then((response) => {
+        this.pokemons = response.map((pokemon) => pokemon.data);
+        console.log(this.pokemons);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  },
+};
 </script>
 
 <style>
+body {
+  padding: 0;
+  margin: 0;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+}
+.pokedex-grid {
+  padding: 1em 100px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  column-gap: 1em;
+  row-gap: 1em;
 }
 </style>
