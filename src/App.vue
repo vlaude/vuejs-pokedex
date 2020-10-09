@@ -2,11 +2,13 @@
   <div id="app">
     <TheHeader></TheHeader>
     <div class="pokedex-grid">
-      <PokemonCard
-        v-for="pokemon in pokemons"
-        v-bind:key="pokemon.id"
-        v-bind:pokemon="pokemon"
-      ></PokemonCard>
+      <transition-group name="list" tag="div">
+        <PokemonCard
+          v-for="pokemon in pokemons"
+          v-bind:key="pokemon.id"
+          v-bind:pokemon="pokemon"
+        ></PokemonCard>
+      </transition-group>
     </div>
   </div>
 </template>
@@ -31,8 +33,11 @@ export default {
   mounted() {
     PokemonService.getPokemons()
       .then((response) => {
-        this.pokemons = response.map((pokemon) => pokemon.data);
-        console.log(this.pokemons);
+        response.data.results.forEach((result) => {
+          PokemonService.getPokemonByUrl(result.url).then((pokemon) => {
+            this.pokemons.push(pokemon.data);
+          });
+        });
       })
       .catch((error) => {
         console.error(error);
@@ -54,9 +59,19 @@ body {
 }
 .pokedex-grid {
   padding: 1em 100px;
+}
+.pokedex-grid > div {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   column-gap: 1em;
   row-gap: 1em;
+}
+.list-enter-active,
+.list-leave-active {
+  transition: all 1s;
+}
+.list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
 }
 </style>
